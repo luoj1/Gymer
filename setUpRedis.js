@@ -3,6 +3,7 @@ import hmacSHA512 from 'crypto-js/hmac-sha512';
 import {promisify} from 'util';
 import redis from 'redis';
 import {generateKey} from './tools.js';
+
 import fs from 'fs';
 
 const client = redis.createClient();
@@ -30,7 +31,7 @@ export async function initRedisSession(name,email,uid,session){
     client.rpush(hmacSHA512(key,pkkey).toString(),name);
     client.rpush(hmacSHA512(key,pkkey).toString(),email);
     client.rpush(hmacSHA512(key,pkkey).toString(),'0');
-
+    client.rpush(hmacSHA512(key,pkkey).toString(),'1');
 
 
     console.log('hash(key)'+hmacSHA512(key,pkkey));

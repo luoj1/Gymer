@@ -15,8 +15,9 @@ client.on("error", function (err) {
 
 const getAsync = promisify(client.hgetall).bind(client);
 
-export async function testSession(uid,sid){
-  var status = await checkRedis(uid,sid);
+export async function testSession(uid,sid,change){
+  var status = await checkRedis(uid,sid,change);
+  console.log("status"+status);
   if (status == 'false'){
     return new Promise((resolve,reject)=>{
       resolve({uid:'false', sid:'false'});
@@ -28,7 +29,7 @@ export async function testSession(uid,sid){
   }
 }
 
-export async function checkRedis(uid,sid){
+export async function checkRedis(uid,sid,change){
   var res = await getAsync(uid);
   var pksession = await readpk('pks/pk-session.txt');
   if(res == null){
@@ -36,10 +37,13 @@ export async function checkRedis(uid,sid){
     return 'false';
   }else{
   if(res[hmacSHA512(sid,pksession).toString()]==1){
+    if(change == 1){
     let session = generateKey(64).toString();
     client.hdel(uid,hmacSHA512(sid,pksession).toString());
     client.hmset(uid,hmacSHA512(session,pksession).toString(),1);
     return session;
+  }
+    return sid;
   }else{
     return 'false';
   }
